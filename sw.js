@@ -1,4 +1,4 @@
-var CACHE = 'cw-park-v2';
+var CACHE = 'cw-park-v3';
 var ASSETS = [
   './',
   './index.html',
@@ -31,9 +31,27 @@ self.addEventListener('activate', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
-  e.respondWith(
-    caches.match(e.request).then(function(r) {
-      return r || fetch(e.request);
-    })
-  );
+  // Network first for HTML — always get fresh content, fall back to cache
+  if(e.request.url.indexOf('.html') > -1 || e.request.url.endsWith('/')) {
+    e.respondWith(
+      fetch(e.request).then(function(response) {
+        var clone = response.clone();
+        caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+        return response;
+      }).catch(function() {
+        return caches.match(e.request);
+      })
+    );
+  } else {
+    // Cache first for everything else (icons, manifest)
+    e.respondWith(
+      caches.match(e.request).then(function(r) {
+        return r || fetch(e.request).then(function(response) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+          return response;
+        });
+      })
+    );
+  }
 });
