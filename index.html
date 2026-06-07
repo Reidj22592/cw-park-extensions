@@ -62,6 +62,17 @@ header p{font-size:10px;opacity:.75;margin-top:2px}
 .c-red{background:#cc0000}.c-orange{background:#d46b00}.c-blue{background:#1a6fcc}
 .c-teal{background:#007a6e}.c-purple{background:#6b3fa0}.c-navy{background:#1a3a6e}
 .c-green{background:#2e7d32}.c-brown{background:#795548}.c-gray{background:#555}
+
+.ios-modal{display:none;position:fixed;bottom:0;left:0;right:0;top:0;background:rgba(0,0,0,0.6);z-index:999;align-items:flex-end;justify-content:center}
+.ios-modal-box{background:white;border-radius:16px 16px 0 0;padding:20px 20px 36px;width:100%;max-width:500px}
+.ios-modal-title{font-size:16px;font-weight:700;color:#111;margin-bottom:4px}
+.ios-modal-sub{font-size:12px;color:#888;margin-bottom:16px}
+.ios-step{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.ios-step:last-of-type{border-bottom:none}
+.ios-step-num{background:#cc0000;color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.ios-step-text{font-size:14px;color:#333;line-height:1.4}
+.ios-step-text strong{color:#111}
+.ios-close-btn{width:100%;margin-top:16px;padding:12px;background:#cc0000;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -240,13 +251,20 @@ window.addEventListener('beforeinstallprompt',function(e){
   });
 });
 
-// iOS Safari only — manual instructions
+// iOS Safari only — show a proper step-by-step modal
 window.addEventListener('load',function(){
   if(isIOS && isSafari && !isStandalone){
     setTimeout(function(){
-      showBanner('Tap the Share button ⬆ then "Add to Home Screen"','OK',function(){ hideBanner(); });
+      document.getElementById('iosModal').style.display='flex';
     }, 1500);
   }
+});
+// iosModalClose is at bottom of body — attach after load
+window.addEventListener('load',function(){
+  var mc=document.getElementById('iosModalClose');
+  if(mc) mc.addEventListener('click',function(){
+    document.getElementById('iosModal').style.display='none';
+  });
 });
 
 var dismissBtn=document.getElementById('installDismiss');
@@ -255,5 +273,25 @@ if(dismissBtn) dismissBtn.addEventListener('click', hideBanner);
 window.addEventListener('appinstalled',function(){ hideBanner(); });
 
 </script>
+
+<div class="ios-modal" id="iosModal">
+  <div class="ios-modal-box">
+    <div class="ios-modal-title">Add to Home Screen</div>
+    <div class="ios-modal-sub">Install CW Park Extensions for quick access</div>
+    <div class="ios-step">
+      <div class="ios-step-num">1</div>
+      <div class="ios-step-text">Tap the <strong>Share button</strong> &#9650; at the bottom of Safari</div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">2</div>
+      <div class="ios-step-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">3</div>
+      <div class="ios-step-text">Tap <strong>"Add"</strong> in the top right corner</div>
+    </div>
+    <button class="ios-close-btn" id="iosModalClose">Got it</button>
+  </div>
+</div>
 </body>
 </html>
